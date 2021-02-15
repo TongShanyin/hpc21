@@ -80,7 +80,7 @@ void iteration(long n, double *u, double *s, double *a, double *f, int max_ite, 
 int main(int argc, char** argv) {
   long n = read_option<long>("-N", argc, argv);
   int type = read_option<int>("-type", argc, argv);
-  long max_ite = read_option<long>("-ite", argc, argv, 5000);
+  long max_ite = read_option<long>("-ite", argc, argv, "5000");
 
   double* f = (double*) malloc(n * sizeof(double));
   double* a = (double*) malloc(n * n * sizeof(double));
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
       if(i==j){
         a[i+j*n] = 2/h/h;
       }
-      if(i==j-1 || i=j+1){
+      if(i==j-1 || i==j+1){
         a[i+j*n] = -1/h/h;
       }
     }
