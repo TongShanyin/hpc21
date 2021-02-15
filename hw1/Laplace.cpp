@@ -10,14 +10,15 @@
 // compute l2 residual of Au-f
 double Residual(long n, double *u, double *a, double *f){
   double res = 0;
+  double Au = 0;
   for (int i = 0; i < n; i++) {
-    double Au = 0;
+    Au = 0;
     for (int j = 0; j < n; j++){
       Au = Au + a[i+j*n]*u[j];
     }
     res = res + pow(Au - f[i], 2);
   }
-  res = sqrt(res);
+  res = pow(res, 0.5);
   return res;
 }
 
@@ -63,7 +64,8 @@ void iteration(long n, double *u, double *s, double *a, double *f, int max_ite, 
   }else{
     printf("Gauss_Seidel \n");
   }
-  printf(" Iteration     Residual \n");
+  printf(" Iteration       Residual \n");
+  printf("%10d %10f \n", ite, res0);
   while (ite < max_ite && rel > tol) {
     ite = ite + 1;
     if (type == 0){
@@ -87,22 +89,22 @@ int main(int argc, char** argv) {
   double* u = (double*) malloc(n * sizeof(double));
   double* s = (double*) malloc(n * sizeof(double));
 
-  double h = 1/(n+1);
 
   for (long i = 0; i < n; i++) f[i] = 1.;
   for (long i = 0; i < n; i++) u[i] = 0.;
   for (long i = 0; i < n; i++) s[i] = 0.;
   for (long i = 0; i < n; i++){
     for (long j = 0; j < n; j++){
-      a[i+i*n]=0;
+      a[i+j*n]=0;
       if(i==j){
-        a[i+j*n] = 2/h/h;
+        a[i+j*n] = 2*pow(n+1,2);
       }
       if(i==j-1 || i==j+1){
-        a[i+j*n] = -1/h/h;
+        a[i+j*n] = -1*pow(n+1,2);
       }
     }
   }
+
 
   const double tol = 1e-6;
 
@@ -111,7 +113,7 @@ int main(int argc, char** argv) {
   iteration(n, u, s, a, f, max_ite, tol, type);
   double time = t.toc();
   printf("time = %f\n", time);
-  
+
   free(f);
   free(a);
   free(u);
