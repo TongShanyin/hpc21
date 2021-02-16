@@ -108,12 +108,16 @@ int main(int argc, char** argv) {
 
 
   const double tol = 1e-6;
+  double res0 = Residual(n, u, a, f);
 
   Timer t;
   t.tic();
   iteration(n, u, s, a, f, max_ite, tol, type);
   double time = t.toc();
   printf("time = %f\n", time);
+
+  double res = Residual(n, u, a, f);
+  printf("factor = %f\n", res0/res);
 
   free(f);
   free(a);
