@@ -90,6 +90,7 @@ int main(int argc, char** argv) {
   double* s = (double*) malloc(n * sizeof(double));
 
 
+  // build f, A and u0
   for (long i = 0; i < n; i++) f[i] = 1.;
   for (long i = 0; i < n; i++) u[i] = 0.;
   for (long i = 0; i < n; i++) s[i] = 0.;
