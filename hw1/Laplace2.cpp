@@ -74,6 +74,7 @@ void iteration(long n, double *u, double *s, int max_ite, double tol, int type){
   }
   printf(" Iteration       Residual \n");
   printf("%10d %10f \n", ite, res0);
+  double res = res0;
   while (ite < max_ite && rel > tol) {
     ite = ite + 1;
     if (type == 0){
@@ -81,7 +82,7 @@ void iteration(long n, double *u, double *s, int max_ite, double tol, int type){
     }else{
       Gauss_Seidel(n, u, s);
     }
-    double res = Residual(n, u);
+    res = Residual(n, u);
     rel = res/res0;
     printf("%10d %10f \n", ite, res);
   }
