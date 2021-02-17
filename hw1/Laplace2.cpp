@@ -1,6 +1,6 @@
 // Solve 1D Laplace equation: BVP, use sparsity of A
 // iterative method for Au = f
-//$ g++ -std=c++11 -O3 Laplace.cpp && ./a.out -N 100 -type 0
+//$ g++ -std=c++11 -O3 Laplace2.cpp && ./a.out -N 100 -type 0
 // -type 0: Jacobi, else: Gauss-Seidel
 
 #include <stdio.h>
@@ -64,7 +64,7 @@ void Gauss_Seidel(long n, double *u, double *s){
 }
 
 void iteration(long n, double *u, double *s, int max_ite, double tol, int type){
-  double res0 = Residual(n, u, a, f);
+  double res0 = Residual(n, u);
   double rel = 1;
   int ite = 0;
   if (type == 0){
@@ -85,6 +85,7 @@ void iteration(long n, double *u, double *s, int max_ite, double tol, int type){
     rel = res/res0;
     printf("%10d %10f \n", ite, res);
   }
+  printf("factor=%f\n", res0/res);
 }
 
 int main(int argc, char** argv) {
@@ -103,14 +104,14 @@ int main(int argc, char** argv) {
 
   const double tol = 1e-6;
 
+
   Timer t;
   t.tic();
   iteration(n, u, s, max_ite, tol, type);
   double time = t.toc();
   printf("time = %f\n", time);
 
-  free(f);
-  free(a);
+
   free(u);
   free(s);
 
