@@ -32,10 +32,10 @@ void Jacobi(long n, double *u, double *s){
   for (int i = 0; i < n; i++){
     s[i] = 0;
     if(i-1>=0){
-      s[i] += u[i-1];
+      s[i] -= u[i-1];
     }
     if(i+1<n){
-      s[i] += u[i+1];
+      s[i] -= u[i+1];
     }
     s[i]=s[i]*(n+1)*(n+1);
   }
@@ -50,7 +50,7 @@ void Gauss_Seidel(long n, double *u, double *s){
   for (int i = 0; i < n; i++){
     s[i] = 0;
     if(i+1<n){
-      s[i] += u[i+1];
+      s[i] -= u[i+1];
     }
     s[i]=s[i]*(n+1)*(n+1);
   }
