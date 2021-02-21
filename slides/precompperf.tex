@@ -1,0 +1,112 @@
+\pgfplotsset{filter discard warning=false}  % alex added to kill huge slow msgs
+
+\definecolor{col-1e-3}{RGB}{0,0,255} % oranged red
+\definecolor{col-1e-8}{RGB}{255,30,0} % dodgerblue
+\definecolor{col-1e-13}{RGB}{0,100,50}
+\definecolor{col-orange}{RGB}{255, 122, 0}
+\pgfplotsset{
+    discard if not/.style 2 args={
+        x filter/.append code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+            % \edef\tempc{\thisrow{#3}}
+            % \edef\tempd{#4}
+            \ifx\tempa\tempb
+                % \ifx\tempc\tempd
+                % \else
+                %     \def\pgfmathresult{inf}
+                % \fi
+            \else
+                \def\pgfmathresult{inf}
+            \fi
+        }
+    }
+}
+\pgfplotsset{
+    discard if/.style 2 args={
+        x filter/.append code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+            \ifx\tempa\tempb
+                \def\pgfmathresult{inf}
+            \else
+
+            \fi
+        }
+    }
+}
+
+\hfill
+\begin{tikzpicture}[
+  scale=0.8,
+  every axis/.style={
+    xlabel={$N$ $\rightarrow$},
+    %log basis x={10},
+    grid,
+    ymin=0,
+	ylabel=percentage of total time (\%),
+  },
+]
+\begin{semilogxaxis}[
+title={relative tolerance $\varepsilon=10^{-3}$},
+legend pos=north west,
+legend cell align=left,
+ybar stacked,
+ymax=1.2,
+ytick={0,0.2,0.4,0.6,0.8,1.0},
+yticklabels={$0$,$20$,$40$,$60$,$80$,$100$}]
+\addplot +[discard if not={tol}{1e-3},
+           color=black,
+           fill=col-1e-3, 
+           thick]
+           table [x=N,y expr={(\thisrow{fmm})/(\thisrow{fmm}+\thisrow{precomp}+\thisrow{sortcharge})}]{data/fmmperf.dat};
+           \addlegendentry{FMM (\textbf{step 5})}
+\addplot +[discard if not={tol}{1e-3},
+          color=black,
+          fill=col-orange, 
+        %   point meta=explicit,
+        %   nodes near coords=\pgfmathprintnumber{\pgfplotspointmeta},
+        %   nodes near coords align={vertical},
+          thick]
+          table [meta=L,x=N,y expr={(\thisrow{precomp})/(\thisrow{fmm}+\thisrow{precomp}+\thisrow{sortcharge})}]
+          {data/fmmperf.dat};
+          \addlegendentry{Pre-comp (\textbf{step 1-3})}
+% \addplot +[discard if not={tol}{1e-3},
+%           color=black,
+%           fill=col-1e-13, 
+%           point meta=explicit,
+%           nodes near coords=\pgfmathprintnumber{\pgfplotspointmeta},
+%           nodes near coords align={vertical},
+%           thick]
+%           table [meta=L,x=N,y expr={(\thisrow{sortcharge})/(\thisrow{fmm}+\thisrow{precomp}+\thisrow{sortcharge})}]
+%           {data/fmmperf.dat};
+%           \addlegendentry{Sort charge}
+\end{semilogxaxis}
+\end{tikzpicture}
+\hfill
+\begin{tikzpicture}[
+  scale=0.8,
+  every axis/.style={
+    xlabel={number of boxes $4^{L-1}$ $\rightarrow$},,
+    log basis x={2},
+    grid,
+    ymin=0,
+	title={},
+	ylabel=wall time (sec) $\rightarrow$,
+  },
+]
+\begin{loglogaxis}[title={Pre-computation, P=10},legend pos=north west,legend cell align=left]
+\addplot +[teal,mark=*,thick,mark options={fill=teal}]
+           table [x=box,y expr={(\thisrow{tree})/1e3}]{data/precomp.dat};
+           \addlegendentry{\textbf{step 1}}
+\addplot +[purple,mark=square*,thick,mark options={fill=purple}]
+           table [x=box,y expr={(\thisrow{list})/1e3}]{data/precomp.dat};
+           \addlegendentry{\textbf{step 2}}
+\addplot +[brown!20!black,mark=triangle*,mark size=3.0pt,thick,mark options={fill=brown!20!black}]
+           table [x=box,y expr={(\thisrow{transferop})/1e3}]{data/precomp.dat};
+           \addlegendentry{\textbf{step 3}}
+\addplot [black, dashed, line width = 1, smooth, domain=100:1000000] {x/100000*10};
+\addlegendentry{$\mathcal{O}(N)$}
+\end{loglogaxis}
+\end{tikzpicture}
+\hfill

@@ -1,0 +1,97 @@
+% 4 plots
+\pgfplotsset{filter discard warning=false}  % alex added to kill huge slow msgs
+
+\definecolor{col-1e-3}{RGB}{0,0,255} % oranged red
+\definecolor{col-1e-8}{RGB}{255,30,0} % dodgerblue
+\definecolor{col-1e-13}{RGB}{0,100,50}
+\definecolor{col-orange}{RGB}{255, 122, 0}
+\pgfplotsset{
+    discard if not/.style 2 args={
+        x filter/.append code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+            % \edef\tempc{\thisrow{#3}}
+            % \edef\tempd{#4}
+            \ifx\tempa\tempb
+                % \ifx\tempc\tempd
+                % \else
+                %     \def\pgfmathresult{inf}
+                % \fi
+            \else
+                \def\pgfmathresult{inf}
+            \fi
+        }
+    }
+}
+\pgfplotsset{
+    discard if/.style 2 args={
+        x filter/.append code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+            \ifx\tempa\tempb
+                \def\pgfmathresult{inf}
+            \else
+
+            \fi
+        }
+    }
+}
+
+\hfill
+\begin{tikzpicture}[
+  scale=0.8,
+  every axis/.style={
+    xlabel={$N$ $\rightarrow$},,
+    log basis x={10},
+    grid,
+    ymin=0,
+	title={},
+	ylabel=wall time (sec) $\rightarrow$,
+  },
+]
+\begin{loglogaxis}[title={Direct v.s. FMM},legend pos=south east,legend cell align=left]
+\addplot +[black, 
+           mark=*,thick]
+           table [x=N,y expr={(\thisrow{fmm})/1e3}]{data/dirfmm.dat};
+           \addlegendentry{Direct}
+\addplot +[purple, 
+           mark=square*,thick]
+           table [x=N,y expr={(\thisrow{dir})/1e3}]{data/dirfmm.dat};
+           \addlegendentry{FMM}
+\end{loglogaxis}
+\end{tikzpicture}
+\hfill
+\begin{tikzpicture}[
+  scale=0.8,
+  every axis/.style={
+    xlabel={$N$ $\rightarrow$},,
+    log basis x={10},
+    grid,
+    ymin=0,
+	title={},
+	ylabel=wall time (sec) $\rightarrow$,
+  },
+]
+\begin{loglogaxis}[title=FMM,legend pos=south east,legend cell align=left]
+\addplot +[discard if not={tol}{1e-3},
+           col-1e-3, 
+           mark=*,mark options={fill=col-1e-3},thick]
+           table [x=N,y expr={(\thisrow{fmm})/1e3}]{data/fmmperf.dat};
+           \addlegendentry{$\varepsilon=10^{-3}$}
+\addplot +[discard if not={tol}{1e-8},
+          col-1e-8, 
+           mark=square*,mark options={fill=col-1e-8},thick]
+           table [x=N,y expr={(\thisrow{fmm})/1e3}]{data/fmmperf.dat};
+           \addlegendentry{$\varepsilon=10^{-8}$}
+\addplot +[discard if not={tol}{1e-13},
+           col-1e-13,
+           mark=diamond*,mark options={fill=col-1e-13},mark size=3.0pt,thick]
+           table [x=N,y expr={(\thisrow{fmm})/1e3}]{data/fmmperf.dat};
+           \addlegendentry{$\varepsilon=10^{-13}$}
+\addplot [black, dashed, line width = 1, smooth, domain=1000:1000000] {x/1000};
+\addlegendentry{$\mathcal{O}(N)$}
+\addplot [black, dotted, line width = 1, smooth, domain=1000:1000000] {x*x/1000000000};
+\addlegendentry{$\mathcal{O}(N^2)$}
+\end{loglogaxis}
+\end{tikzpicture}
+\hfill
