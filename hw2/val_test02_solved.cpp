@@ -16,13 +16,15 @@ int main ( )
 //
 //    MAIN is the main program for TEST01.
 //
-//  Discussion:
+//  Discussion: TEST02 has some uninitialized data.
+//    ERROR SUMMARY: 24 errors from 4 contexts, "Use of uninitialised value of size 8" and "Conditional jump
+//    or move depends on uninitialised value(s)" when we want to print x,
+//    but some entries of x are not initialized. So I change the initialization to i<10, i.e., all entries of x.
 //
-//    TEST02 has some uninitialized data.
 //
 //  Licensing:
 //
-//    This code is distributed under the GNU LGPL license. 
+//    This code is distributed under the GNU LGPL license.
 //
 //  Modified:
 //
@@ -64,7 +66,7 @@ void junk_data ( )
 //
 //  Licensing:
 //
-//    This code is distributed under the GNU LGPL license. 
+//    This code is distributed under the GNU LGPL license.
 //
 //  Modified:
 //
@@ -78,7 +80,7 @@ void junk_data ( )
 //
 //  X = { 0, 1, 2, 3, 4, ?a, ?b, ?c, ?d, ?e }.
 //
-  for ( i = 0; i < 5; i++ )
+  for ( i = 0; i < 10; i++ )
   {
     x[i] = i;
   }
@@ -101,7 +103,7 @@ void junk_data ( )
 //
   for ( i = 0; i < 10; i++ )
   {
-    cout << "  " << i << "  " << x[i] << "\n";
+    cout << "  " << i << "  " << x[i] << "\n"; //Error: Conditional jump or move depends on uninitialised value(s)
   }
 
   delete [] x;
