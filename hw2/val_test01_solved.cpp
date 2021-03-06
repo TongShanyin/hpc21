@@ -1,3 +1,6 @@
+// g++ -std=c++11 -g val_test01_solved.cpp -o val_test01_solved
+// valgrind ./val_test01_solved
+
 # include <cstdlib>
 # include <iostream>
 
@@ -21,9 +24,15 @@ int main ( )
 //    TEST01 calls F, which has a memory "leak".  This memory leak can be
 //    detected by VALGRID.
 //
+//    There are 3 errors detected by valgrind.
+//     (1) Error: Mismatched free() / delete / delete []
+//         Since we use malloc() before, we need to use free() other than delete() to free memory;
+//     (2)&(3): we use malloc() for length n but the loop for i<=n, which requires n+1, exceeds the length.
+//
+//
 //  Licensing:
 //
-//    This code is distributed under the GNU LGPL license. 
+//    This code is distributed under the GNU LGPL license.
 //
 //  Modified:
 //
@@ -59,7 +68,7 @@ void f ( int n )
 //
 //  Licensing:
 //
-//    This code is distributed under the GNU LGPL license. 
+//    This code is distributed under the GNU LGPL license.
 //
 //  Modified:
 //
@@ -77,13 +86,14 @@ void f ( int n )
   x[1] = 1;
   cout << "  " << 1 << "  " << x[1] << "\n";
 
-  for ( i = 2; i <= n; i++ )
+  for ( i = 2; i <n; i++ )
   {
-    x[i] = x[i-1] + x[i-2];
+    x[i] = x[i-1] + x[i-2]; // Invalid read of size 4
     cout << "  " << i << "  " << x[i] << "\n";
   }
 
-  delete [] x;
+  // delete [] x; // Error: Mismatched free() / delete / delete []
+  free(x); // Since we use malloc() before, we need to use free() other than delete() to free memory
 
   return;
 }
