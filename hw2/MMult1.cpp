@@ -96,13 +96,13 @@ int main(int argc, char** argv) {
 
 
 
-    // printf("%10ld %10f %10f %10f", p, time, flops, bandwidth);
-    printf("%10ld  & %10f  & %10f & %10f", p, time, flops, bandwidth);
+    printf("%10ld %10f %10f %10f", p, time, flops, bandwidth);
+    // printf("%10ld  & %10f  & %10f & %10f", p, time, flops, bandwidth);
 
     double max_err = 0;
     for (long i = 0; i < m*n; i++) max_err = std::max(max_err, fabs(c[i] - c_ref[i]));
-    // printf(" %10e\n", max_err);
-    printf(" &  %10e\\\\ \n", max_err);
+    printf(" %10e\n", max_err);
+    // printf(" &  %10e\\\\ \n", max_err);
 
     aligned_free(a);
     aligned_free(b);
