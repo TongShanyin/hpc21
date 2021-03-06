@@ -1,0 +1,265 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[centertags]{amsmath}
+\usepackage{amsfonts,amssymb, amsthm}
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage[shortlabels]{enumitem}
+\usepackage{bm}
+
+\usepackage{cite,graphicx,color}
+%\usepackage{fourier}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{enumitem}
+\usepackage{bbm}
+
+\usepackage{tikz,pgfplots}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\usepackage{mathtools}
+%\mathtoolsset{showonlyrefs} % only show no. of refered eqs
+
+\usepackage{cleveref}
+
+\textheight 8.5in
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{assumption}{Assumption}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+
+\newtheoremstyle{dotlessP}{}{}{\color{blue!50!black}}{}{\color{blue}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{question}{Question}
+
+
+
+\def\VV{\mathbb{V}}
+\def\EE{\mathbb{E}}
+\def\PP{\mathbb{P}}
+\def\RR{\mathbb{R}}
+\newcommand{\mD}{\mathcal{D}}
+\newcommand{\mF}{F}%{\mathcal{F}}
+
+\DeclareMathOperator{\sgn}{sgn}
+%\DeclareMathOperator{\erf}{erf}
+\DeclareMathOperator{\erfc}{erfc}
+\DeclareRobustCommand{\argmin}{\operatorname*{argmin}}
+\DeclareRobustCommand{\arginf}{\operatorname*{arginf}}
+
+\def\EE{\mathbb{E}}\def\PP{\mathbb{P}}
+\def\NN{\mathbb{N}}\def\RR{\mathbb{R}}\def\ZZ{\mathbb{Z}}
+
+
+
+\def\<{\left\langle} \def\>{\right\rangle}
+
+
+
+
+
+
+
+\newcommand{\emphasis}[1]{\textcolor{red!80!black}{#1}}
+\newcommand{\shanyin}[1]{\textcolor{blue!80!black}{#1}}
+
+% ****************************
+\begin{document}
+
+
+\title{High performance computing HW2}
+\author{Shanyin Tong, st3255@nyu.edu}
+
+\maketitle
+
+\section{Finding Memory bugs}
+\begin{itemize}
+	\item \texttt{val\_test01}: The command to free memory mismatches the one allocate memory. The loop calls the entries out of the list.
+	\item \texttt{val\_test02}: Print and compute uninitialized vector.
+\end{itemize}
+The details could be found in the codes.
+
+\section{Optimizing matrix-matrix multiplication}
+The problem is $C=C+AB$, where $A\in\RR^{m\times k}, B\in\RR^{k\times n}, C\in \RR^{m\times n}$. The matrix is stored column-wisely. The CPU I use is AMD Opteron(TM) Processor 6272, same for the following other problems.
+\subsection{Rearrange loops}
+In this chapter, I use the notation as $(n,k,m)$ to denote the order of loop. For example, the \texttt{MMult0} is in the order $(n,k,m)$.
+
+
+	\begin{table}[tbhp] 
+	\footnotesize
+		\caption{Comparison time for matrix-matrix multiplication for different arrangement of loops for size $m=n=k=160$ with repeat $1e9/(mnk)+1$, with optimization flag -O3 -march=native.
+		}\label{tab:loop}
+		\begin{center}
+\begin{tabular}{|c|c|}
+	\hline 
+Order for the loop	& Time \\ 
+	\hline 
+$(n,k,m)$	& 0.692787 \\ \hline 
+$(n,m,k)$ &  2.423846\\\hline 
+$(m,n,k)$ &  2.397280 \\ \hline 
+$(m,k,n)$ & 13.196696 \\\hline
+$(k,n,m)$ &  0.791668\\ \hline 
+$(k,m,n)$ & 13.192922 \\\hline
+\end{tabular} 
+\end{center}
+	
+\end{table}
+
+In \cref{tab:loop}, I compare the computation time for different arrangement of loops, and they are very different.  Since the matrix is stored column-wisely, the traversal through column is cache-hint, so it is fast, but the traversal through row is cache-miss, which is slow. The fastest ones are $(n,k,m)$ and $(k,n,m)$, because they both traverse $A$ and $C$ column-wisely, so they can use the fast memory for columns of $A$ and $C$. The$(n,m,k)$ and $(m,n,k)$ are slower, because they traverse $A$ row-wisely. The $(m,k,n)$ and $(k,m,n)$ are the slowest, they traverse both $B$ and $C$ row-wisely.
+
+Finally, I print the performance corresponding to the best one $(n,k,m)$. The flops is $O(mnk)$ and the bandwidth is $O(mnk+2mn+nk)$. I observe performance degrades for larger matrix sizes about $500$ that the columns do not fit in the cache.
+	\begin{table}[tbhp] 
+	{\footnotesize
+		\caption{Results for matrix-matrix multiplication using loop $(n,k,m)$ with optimization flags -O3 -march=native.
+		}\label{tab:nkm}
+		\begin{center}
+			\begin{tabular}{ccccc}
+				\hline 
+				Dimension &    Time [s] &  Flop rate [Gflop/s]     & Bandwidth  [GB/s] & Error\\ 
+				\hline 
+        16  &   2.281989  &   0.876430 &   4.163041 &  0.000000e+00\\ 
+64  &   0.654753  &   3.054829 &  12.792096 &  0.000000e+00\\ 
+112  &   0.764189  &   2.617960 &  10.752336 &  0.000000e+00\\ 
+160  &   0.690154  &   2.908105 &  11.850529 &  0.000000e+00\\ 
+208  &   0.672741  &   2.996333 &  12.158198 &  0.000000e+00\\ 
+256  &   0.661910  &   3.041600 &  12.308974 &  0.000000e+00\\ 
+304  &   0.640250  &   3.159391 &  12.762277 &  0.000000e+00\\ 
+352  &   0.655741  &   3.059521 &  12.342387 &  0.000000e+00\\ 
+400  &   0.670329  &   3.055217 &  12.312525 &  0.000000e+00\\ 
+448  &   0.769701  &   2.803645 &  11.289679 &  0.000000e+00\\ 
+496  &   0.921357  &   2.383910 &   9.593314 &  0.000000e+00\\ 
+544  &   1.145995  &   1.966717 &   7.910251 &  0.000000e+00\\ 
+592  &   1.224027  &   1.695017 &   6.814428 &  0.000000e+00\\ 
+640  &   1.262754  &   1.660777 &   6.674246 &  0.000000e+00\\ 
+688  &   1.572171  &   1.657125 &   6.657405 &  0.000000e+00\\ 
+736  &   1.464012  &   1.633955 &   6.562461 &  0.000000e+00\\ 
+784  &   1.778145  &   1.626043 &   6.529062 &  0.000000e+00\\ 
+832  &   1.423233  &   1.618654 &   6.497961 &  0.000000e+00\\ 
+880  &   1.681396  &   1.621206 &   6.506929 &  0.000000e+00\\ 
+928  &   1.998919  &   1.599222 &   6.417568 &  0.000000e+00\\ 
+976  &   2.561884  &   1.451610 &   5.824287 &  0.000000e+00\\ 
+1024  &   1.642057  &   1.307801 &   5.246531 &  0.000000e+00\\ 
+1072  &   1.738030  &   1.417611 &   5.686313 &  0.000000e+00\\ 
+1120  &   2.058518  &   1.364990 &   5.474584 &  0.000000e+00\\ 
+1168  &   2.316265  &   1.375847 &   5.517525 &  0.000000e+00\\ 
+1216  &   2.671996  &   1.345845 &   5.396660 &  0.000000e+00\\ 
+1264  &   2.970168  &   1.359847 &   5.452299 &  0.000000e+00\\ 
+1312  &   3.362334  &   1.343354 &   5.385704 &  0.000000e+00\\ 
+1360  &   3.739012  &   1.345519 &   5.393949 &  0.000000e+00\\ 
+1408  &   4.247838  &   1.314226 &   5.268104 &  0.000000e+00\\ 
+1456  &   4.591733  &   1.344428 &   5.388792 &  0.000000e+00\\ 
+1504  &   5.044719  &   1.348766 &   5.405824 &  0.000000e+00\\ 
+1552  &   5.548051  &   1.347611 &   5.400865 &  0.000000e+00\\ 
+1600  &   6.093851  &   1.344306 &   5.387306 &  0.000000e+00\\ 
+1648  &   6.705767  &   1.334914 &   5.349374 &  0.000000e+00\\ 
+1696  &   7.724656  &   1.263073 &   5.061228 &  0.000000e+00\\ 
+1744  &   7.931768  &   1.337517 &   5.359273 &  0.000000e+00\\ 
+1792  &   9.068969  &   1.269071 &   5.084784 &  0.000000e+00\\ 
+1840  &   9.366179  &   1.330212 &   5.329525 &  0.000000e+00\\ 
+1888  &  10.236097  &   1.314927 &   5.268065 &  0.000000e+00\\ 
+1936  &  11.128259  &   1.304124 &   5.224579 &  0.000000e+00\\ 
+1984  &  11.873222  &   1.315486 &   5.269903 &  0.000000e+00\\ 
+				\hline 
+\end{tabular} 
+\end{center}
+}
+\end{table}
+
+\subsection{Matrix tiling}
+By splitting the matrices into $b\times b$ blocks and use the same order $(n,k,m)$ as last section for block loop order as well as the matrix-matrix multiplication inside blocks. Thus, this will go through $mk/b^2\cdot n/b$ blocks of $A$ and $kn/b^2$
+blocks of $B$ and write/read $mn/b^2$ blocks of $C$, so $mnk/b^3+kn/b^2+2mn/b^2$ blocks in total. So the bandwidth is $O(mkn/b +kn+2mn)$, while the flop rate is $O(2mnk)$. Through trying different values of $b$, I find $b=320$ provides best performance, as shown in \cref{tab:block}. The tilting method in \cref{tab:block} spends about 1/3 time of the original method in \cref{tab:nkm}.
+	\begin{table}[tbhp] 
+	{\footnotesize
+		\caption{Results for matrix-matrix multiplication using tilting with block size 320, optimization flags -O3 -march=native.
+		}\label{tab:block}
+		\begin{center}
+			\begin{tabular}{ccccc}
+				\hline 
+				Dimension   &    Time [s] &  Flop rate [Gflop/s]     & Bandwidth  [GB/s] & Error\\ 
+				\hline 
+       320  &   0.633443  &   3.207261 &   0.160363 &  0.000000e+00\\ 
+640  &   0.737070  &   2.845254 &   0.088914 &  0.000000e+00\\ 
+960  &   1.207923  &   2.929776 &   0.073244 &  0.000000e+00\\ 
+1280  &   1.494932  &   2.805682 &   0.061374 &  0.000000e+00\\ 
+1600  &   2.811034  &   2.914231 &   0.058285 &  0.000000e+00\\ 
+1920  &   4.892113  &   2.893592 &   0.054255 &  0.000000e+00\\ 
+				\hline 
+\end{tabular} 
+\end{center}
+}
+\end{table}
+
+	\begin{table}[tbhp] 
+	{\footnotesize
+		\caption{Results for matrix-matrix multiplication using tilting with block size 320, using OpenMP with optimization flags -O3 -march=native -fopenmp.
+		}\label{tab:omp}
+		\begin{center}
+			\begin{tabular}{ccccc}
+				\hline 
+				Dimension   &    Time [s] &  Flop rate [Gflop/s]     & Bandwidth  [GB/s] & Error\\ 
+				\hline 
+       320  &   0.937645  &   2.166723 &   0.108336 &  0.000000e+00\\ 
+640  &   0.486493  &   4.310751 &   0.134711 &  0.000000e+00\\ 
+960  &   0.547621  &   6.462396 &   0.161560 &  0.000000e+00\\ 
+1280  &   0.497270  &   8.434663 &   0.184508 &  0.000000e+00\\ 
+1600  &   0.768023  &  10.666351 &   0.213327 &  0.000000e+00\\ 
+1920  &   1.130826  &  12.518085 &   0.234714 &  0.000000e+00\\ 
+				\hline 
+\end{tabular} 
+\end{center}
+}
+\end{table}
+
+Then I use OpenMP to run the codes, the results are in \cref{tab:block}. I don't find the peak flop rate for the machine I use, so I compare with the test flop rate in \url{https://www.cpubenchmark.net/cpu.php?cpu=AMD+Opteron+6272&id=1569}, which is 11,196 MOps/Sec. In \cref{tab:block}, the flop rate increases as the dimension increases, the largest one is 12.518085 Gflop/s which is 120\%
+ of the website result, but since the website does not list the peak flop rate, I am unable to compare with it.
+ 
+ \section{Approximating special function using Taylor series and vectorization}
+ I implement using both AVX intrinsics and Vec class by adding more terms in Taylor expansion, and both are accurate to about 12-digits. The results are shown in \cref{tab:Taylor}.
+ 
+ 	\begin{table}[tbhp] 
+ 	{\footnotesize
+ 		\caption{Comparison of approximating sin() using different methods, the codes run with optimization flags -O3 -march=native. The Reference time for C/C++ function is  53.0432 [s].
+ 		}\label{tab:Taylor}
+ 		\begin{center}
+\begin{tabular}{|c|c|c|}
+	\hline 
+Method	& Time [s] &  Error\\ 
+	\hline 
+Taylor expansion	&  3.5621 & 6.928125e-12 \\ \hline 
+AVX intrinsics &  2.7019 & 	6.928125e-12\\ \hline 
+Vec class&  2.7021   & 	 6.928125e-12\\ \hline 
+\end{tabular} 
+ 		\end{center}
+ 	}
+ \end{table}
+ 
+
+
+\end{document}
