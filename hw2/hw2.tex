@@ -238,7 +238,11 @@ blocks of $B$ and write/read $mn/b^2$ blocks of $C$, so $mnk/b^3+kn/b^2+2mn/b^2$
 \end{table}
 
 Then I use OpenMP to run the codes, the results are in \cref{tab:block}. I don't find the peak flop rate for the machine I use, so I compare with the test flop rate in \url{https://www.cpubenchmark.net/cpu.php?cpu=AMD+Opteron+6272&id=1569}, which is 11,196 MOps/Sec. In \cref{tab:block}, the flop rate increases as the dimension increases, the largest one is 12.518085 Gflop/s which is 120\%
- of the website result, but since the website does not list the peak flop rate, I am unable to compare with it.
+ of the website result, but since the website does not list the peak flop rate, I am unable to compare with it. I also find a formula for computing the node performance
+$
+ \text{Node performance in Gflops=(CPU speed in GHz)}\times\text{number of CPU cores)}\times \text{(CPU instruction per cycle)} \times \text{(number of CPUs per node)} = 2.1\times 8 \times 4 \times 1 = 67.2.
+$
+ Here, I use 8 cores instead of 16 cores because that is what I read when use \texttt{cat /proc/cpuinfo} in \texttt{crunchy1}, although the AMD website lists 16 cores. So my results 12.518085 Gflop/s only reaches 18\% of the CPU peak flop rate.
  
  \section{Approximating special function using Taylor series and vectorization}
  I implement using both AVX intrinsics and Vec class by adding more terms in Taylor expansion, and both are accurate to about 12-digits. The results are shown in \cref{tab:Taylor}.
