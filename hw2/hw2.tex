@@ -244,6 +244,8 @@ $
 $
  Here, I use 8 cores instead of 16 cores because that is what I read when use \texttt{cat /proc/cpuinfo} in \texttt{crunchy1}, although the AMD website lists 16 cores. So my results 12.518085 Gflop/s only reaches 18\% of the CPU peak flop rate.
  
+ For a single core, the peak flop rate is 8.4 Gflops/s, in \cref{tab:block}, the flop rate I get is about 3 Gflops/s, so I achieve 35.7\% of the peak flop rate for single core computation.
+ 
  \section{Approximating special function using Taylor series and vectorization}
  I implement using both AVX intrinsics and Vec class by adding more terms in Taylor expansion, and both are accurate to about 12-digits. The results are shown in \cref{tab:Taylor}.
  
