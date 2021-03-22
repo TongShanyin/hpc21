@@ -1,0 +1,125 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[centertags]{amsmath}
+\usepackage{amsfonts,amssymb, amsthm}
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage[shortlabels]{enumitem}
+\usepackage{bm}
+
+\usepackage{cite,graphicx,color}
+%\usepackage{fourier}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{enumitem}
+\usepackage{bbm}
+
+\usepackage{tikz,pgfplots}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\usepackage{mathtools}
+%\mathtoolsset{showonlyrefs} % only show no. of refered eqs
+
+\usepackage{cleveref}
+
+\textheight 8.5in
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{assumption}{Assumption}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+
+\newtheoremstyle{dotlessP}{}{}{\color{blue!50!black}}{}{\color{blue}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{question}{Question}
+
+
+
+\def\VV{\mathbb{V}}
+\def\EE{\mathbb{E}}
+\def\PP{\mathbb{P}}
+\def\RR{\mathbb{R}}
+\newcommand{\mD}{\mathcal{D}}
+\newcommand{\mF}{F}%{\mathcal{F}}
+
+\DeclareMathOperator{\sgn}{sgn}
+%\DeclareMathOperator{\erf}{erf}
+\DeclareMathOperator{\erfc}{erfc}
+\DeclareRobustCommand{\argmin}{\operatorname*{argmin}}
+\DeclareRobustCommand{\arginf}{\operatorname*{arginf}}
+
+\def\EE{\mathbb{E}}\def\PP{\mathbb{P}}
+\def\NN{\mathbb{N}}\def\RR{\mathbb{R}}\def\ZZ{\mathbb{Z}}
+
+
+
+\def\<{\left\langle} \def\>{\right\rangle}
+
+
+
+
+
+
+
+\newcommand{\emphasis}[1]{\textcolor{red!80!black}{#1}}
+\newcommand{\shanyin}[1]{\textcolor{blue!80!black}{#1}}
+
+% ****************************
+\begin{document}
+
+
+\title{High performance computing HW3}
+\author{Shanyin Tong, st3255@nyu.edu}
+
+\maketitle
+
+\section{OpenMP warm-up}
+\begin{enumerate}[(a)]
+	\item Since there are two chunks,  OpenMP divides iterations into chunks that are approximately equal in size, then each chunks is about size $n/2$. 
+	
+	For the first for-loop,  the execution for the first part is $$1+2+\ldots+\frac{n}{2}=\frac{1}{2}(1+\frac{n}{2})\frac{n}{2}=\frac{n(n+2)}{8},$$ the second part is 
+	$$ (\frac{n}{2}+1) + \ldots + (n-1) = \frac{1}{2}( \frac{n}{2}+1+n-1)(\frac{n}{2}-1)=\frac{3n(n-2)}{8}.$$ Assume $n$ is large, the total execution time is 
+	$$\max\{\frac{n(n+2)}{8}, \frac{3n(n-2)}{8}\}=  \frac{3n(n-2)}{8},$$ the wait time is $$\frac{3n(n-2)}{8} - \frac{n(n+2)}{8} = \frac{n^2-2n}{4} .$$
+	
+	For the second for-loop, the execution for the first part is $$(n-1)+(n-2)+\ldots+(n-\frac{n}{2})=\frac{1}{2}(n-1+n-\frac{n}{2})\frac{n}{2}=\frac{n(3n-2)}{8},$$ the second part is 
+	$$ (n-\frac{n}{2}-1 )+ \ldots +(n- n+1) = \frac{1}{2}( n-\frac{n}{2}-1+n-n+1)(\frac{n}{2}-1)=\frac{n(n-2)}{8}.$$ Assume $n$ is large, the total execution time is 
+	$$\max\{\frac{n(3n-2)}{8}, \frac{n(n-2)}{8}\}=  \frac{n(3n-2)}{8},$$ the wait time is $$\frac{n(3n-2)}{8} - \frac{n(n-2)}{8} = \frac{n^2}{4} .$$
+	
+	Thus, the total time each thread spend to execute the parallel region is $\frac{3n(n-2)}{8}+\frac{n(3n-2)}{8}=\frac{3n^2-4n}{4}$ milliseconds, the total wait time is $\frac{n^2-2n}{4}+\frac{n^2}{4}=\frac{n^2-n}{2}$ milliseconds.
+	
+	
+	\item Using \texttt{schedule(static, 1)} means the chunk size is 1. The first thread execute iterations $1, 3, \ldots, n-1$, and the second thread execute iterations $2, 4, \ldots, n-2$. So for the first loop, thread 1 takes $1+3+\ldots+n-1=\frac{n^2}{4}$ milliseconds, thread 2 takes $\frac{n(n-2)}{4}$ milliseconds, so the total execution time is $\frac{n^2}{4}$ milliseconds, wait time is $\frac{n}{2}$ milliseconds. For the second loop, the situation is the same as the first loop. So the total execution time for each thread is $\frac{n^2}{2}$ milliseconds, smaller than (a). 
+	
+	\item By using \texttt{schedule(dynamic, 1)}, since OpenMP dynamically distributes the iterations during the runtime, when thread 1 takes iteration 1, thread 2 take iteration 2, but thread 1 execution time is shorter than thread 2, so thread 1 will take iteration 3... So thread 1 will take iterations $1, 3, \ldots, n-1$ and thread 2 will take iterations $2, 4, \ldots, n-2$, which is same as (b), so it will not improve the run time.
+	
+	\item We can use \texttt{nowait} to eliminate the wait time. When using \texttt{nowait}, in case (a), thread 1 uses $\frac{n(n+2)}{8}+\frac{n(3n-2)}{8}=\frac{n^2}{2}$ milliseconds, thread 2 uses $\frac{3n(n-2)}{8}+\frac{n(n-2)}{8}=\frac{n^2-2n}{2}$ milliseconds. In case (b), thread 1 uses $\frac{n^2}{2}$, thread 2 uses $\frac{n^2-2n}{2}$ milliseconds. In case(c), both thread uses $\frac{n^2-n}{2}$ milliseconds.
+	
+\end{enumerate}
+
+\end{document}
