@@ -12,11 +12,12 @@
 #define VECLEN 100
 
 float a[VECLEN], b[VECLEN];
+float sum; // initialize sum outside
 
 float dotprod ()
 {
 int i,tid;
-float sum;
+// float sum;
 
 tid = omp_get_thread_num();
 #pragma omp for reduction(+:sum)
@@ -30,7 +31,7 @@ tid = omp_get_thread_num();
 
 int main (int argc, char *argv[]) {
 int i;
-float sum;
+// float sum;
 
 for (i=0; i < VECLEN; i++)
   a[i] = b[i] = 1.0 * i;
@@ -42,4 +43,3 @@ sum = 0.0;
 printf("Sum = %f\n",sum);
 
 }
-

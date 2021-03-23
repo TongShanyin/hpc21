@@ -1,3 +1,6 @@
+// Please first run: limit stacksize unlimited
+// in command window to enlarge stacksize
+
 /******************************************************************************
 * FILE: omp_bug4.c
 * DESCRIPTION:
@@ -9,8 +12,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define N 1048
+// stacksize is too small
 
-int main (int argc, char *argv[]) 
+
+int main (int argc, char *argv[])
 {
 int nthreads, tid, i, j;
 double a[N][N];
@@ -21,12 +26,13 @@ double a[N][N];
 
   /* Obtain/print thread info */
   tid = omp_get_thread_num();
-  if (tid == 0) 
+  if (tid == 0)
     {
     nthreads = omp_get_num_threads();
     printf("Number of threads = %d\n", nthreads);
     }
   printf("Thread %d starting...\n", tid);
+
 
   /* Each thread works on its own private copy of the array */
   for (i=0; i<N; i++)
@@ -39,4 +45,3 @@ double a[N][N];
   }  /* All threads join master thread and disband */
 
 }
-
