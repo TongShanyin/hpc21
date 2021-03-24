@@ -1,4 +1,5 @@
 // Jacobi method for Laplace equation in 2D
+// To set number of threads: setenv OMP_NUM_THREADS 8
 // To use openmp: g++ -std=c++11 -fopenmp jacobi2D-omp.cpp -o jacobi2D-omp && ./jacobi2D-omp 1000 100
 // Not use openmp: g++ -std=c++11  jacobi2D-omp.cpp -o jacobi2D && ./jacobi2D 1000 100
 
@@ -17,19 +18,17 @@ void Jacobi(long N, double h, double *u, double *f, double *s){
   #ifdef _OPENMP
     #pragma omp parallel for
   #endif
-  for (long i=1; i <= N; i++){
-    for (long j = 1; j <= N; j++){
+  for (long j = 1; j <= N; j++){
+    for (long i = 1; i <= N; i++){
       s[i+j*(N+2)] = u[i-1+j*(N+2)] + u[i+(j-1)*(N+2)] + u[i+1+j*(N+2)] + u[i+(j+1)*(N+2)];
     }
   }
-  #ifdef _OPENMP
-    #pragma omp barrier
-  #endif
+
   #ifdef _OPENMP
     #pragma omp parallel for
   #endif
-  for (long i=1; i <= N; i++){
-    for (long j = 1; j <= N; j++){
+  for (long j = 1; j <= N; j++){
+    for (long i = 1; i <= N; i++){
       u[i+j*(N+2)] = (h*h*f[i+j*(N+2)] + s[i+j*(N+2)]) / 4;
     }
   }
@@ -41,8 +40,8 @@ double Residual(long N, double *u, double *f){
   #ifdef _OPENMP
     #pragma omp parallel for reduction(+:res)
   #endif
-  for (long i=1; i <= N; i++){
-    for (long j = 1; j <= N; j++){
+  for (long j = 1; j <= N; j++){
+    for (long i = 1; i <= N; i++){
       res += pow((4*u[i+j*(N+2)] - u[i-1+j*(N+2)] - u[i+(j-1)*(N+2)] -
        u[i+1+j*(N+2)] - u[i+(j+1)*(N+2)])*(N+1)*(N+1) - f[i+j*(N+2)], 2);
     }
@@ -59,7 +58,7 @@ void Jacobi_iter(long N, double *u, double *f, double *s, int max_ite, double to
   double res;
   int ite = 0;
   // // uncomment this part if want to print iterations
-  // printf("Jacobi Iterations:\n");
+  printf("Jacobi Iterations:\n");
   // printf(" Iteration       Residual \n");
   // printf("%10d %10f \n", ite, res0);
   while (ite < max_ite && rel > tol) {
