@@ -83,7 +83,9 @@ void print_results(float array[N], int tid, int section)
     printf("\n");
   } /*** end of critical ***/
 
-  // #pragma omp barrier // should not use barrier here
+  // #pragma omp barrier // should not use barrier here,
+  // because this function is called in a section (only one thread executes),
+  // it will cause the section to wait and never ends
   printf("Thread %d done and synchronized.\n", tid);
 
 }

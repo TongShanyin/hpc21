@@ -1,7 +1,7 @@
 CXX=g++
 CXXFLAGS=-std=c++11
 
-all: omp-solved2 omp-solved3  omp-solved4 omp-solved5 omp-solved6
+all: omp-solved2 omp-solved3  omp-solved4 omp-solved5 omp-solved6 omp-scan
 
 omp-solved2: omp_solved2.c
 	$(CXX) $(CXXFLAGS) -fopenmp omp_solved2.c -o omp-solved2
@@ -19,7 +19,10 @@ omp-solved5: omp_solved5.c
 omp-solved6: omp_solved6.c
 	$(CXX) $(CXXFLAGS) -fopenmp omp_solved6.c -o omp-solved6
 
+omp-scan: omp-scan.cpp
+		$(CXX) $(CXXFLAGS) -fopenmp omp-scan.cpp -o omp-scan
+
 
 
 clean:
-	rm omp-solved2 omp-solved3 omp-solved4 omp-solved5 omp-solved6
+	rm omp-solved2 omp-solved3 omp-solved4 omp-solved5 omp-solved6 omp-scan
