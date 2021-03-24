@@ -4,20 +4,38 @@
 #include <math.h>
 #ifdef _OPENMP
 #include <omp.h>
+#else
+#include "utils.h"
 #endif
 
-// Jacobi iteration update
-void Jacobi(long N, double h, double *u, double *f){
+// Jacobi iteration update, s for storing the internal states
+void Jacobi(long N, double h, double *u, double *f, double *s){
   // double h = 1/(N+1);
   #ifdef _OPENMP
     #pragma omp parallel for
   #endif
   for (long i=1; i <= N; i++){
     for (long j = 1; j <= N; j++){
-      u[i+j*(N+2)] = (h*h*f[i+j*(N+2)] + u[i-1+j*(N+2)] + u[i+(j-1)*(N+2)] +
-       u[i+1+j*(N+2)] + u[i+(j+1)*(N+2)]) / 4;
+      s[i+j*(N+2)] = u[i-1+j*(N+2)] + u[i+(j-1)*(N+2)] + u[i+1+j*(N+2)] + u[i+(j+1)*(N+2)];
     }
   }
+  #ifdef _OPENMP
+    #pragma omp parallel for
+  #endif
+  for (long i=1; i <= N; i++){
+    for (long j = 1; j <= N; j++){
+      u[i+j*(N+2)] = (h*h*f[i+j*(N+2)] + s[i+j*(N+2)]) / 4;
+    }
+  }
+  // #ifdef _OPENMP
+  //   #pragma omp parallel for
+  // #endif
+  // for (long i=1; i <= N; i++){
+  //   for (long j = 1; j <= N; j++){
+  //     u[i+j*(N+2)] = (h*h*f[i+j*(N+2)] + u[i-1+j*(N+2)] + u[i+(j-1)*(N+2)] +
+  //      u[i+1+j*(N+2)] + u[i+(j+1)*(N+2)]) / 4;
+  //   }
+  // }
 }
 
 // compute residual
@@ -37,7 +55,7 @@ double Residual(long N, double *u, double *f){
 }
 
 // Jacobi full iterations
-void Jacobi_iter(long N, double *u, double *f, int max_ite, double tol){
+void Jacobi_iter(long N, double *u, double *f, double *s, int max_ite, double tol){
   double h = 1/(N+1);
   double res0 = Residual(N, u, f);
   double rel = 1;
@@ -48,7 +66,7 @@ void Jacobi_iter(long N, double *u, double *f, int max_ite, double tol){
   while (ite < max_ite && rel > tol) {
     ite = ite + 1;
     Jacobi(N, h, u, f);
-    double res = Residual(N, u, f);
+    double res = Residual(N, u, f, s);
     rel = res/res0;
     printf("%10d %10f \n", ite, res);
   }
@@ -60,12 +78,14 @@ int main(int argc, char** argv) {
 
   double* f = (double*) malloc((N+2)*(N+2) * sizeof(double));
   double* u = (double*) malloc((N+2)*(N+2) * sizeof(double));
+  double* s = (double*) malloc((N+2)*(N+2) * sizeof(double));
 
 
 
   // build f and u0
   for (long i = 0; i < (N+2)*(N+2); i++) f[i] = 1.;
   for (long i = 0; i < (N+2)*(N+2); i++) u[i] = 0.;
+  for (long i = 0; i < (N+2)*(N+2); i++) s[i] = 0.;
 
 
   const double tol = 1e-6;
@@ -77,7 +97,7 @@ int main(int argc, char** argv) {
     Timer t;
     t.tic();
   #endif
-  Jacobi_iter(N, u, f, max_ite, tol);
+  Jacobi_iter(N, u, f, s, max_ite, tol);
   #ifdef _OPENMP
     double time = omp_get_wtime() - tt;
   #else
@@ -90,6 +110,7 @@ int main(int argc, char** argv) {
 
   free(f);
   free(u);
+  free(s);
 
   return 0;
 }
