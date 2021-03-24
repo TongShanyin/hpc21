@@ -122,4 +122,32 @@
 	
 \end{enumerate}
 
+\section{Finding OpenMP bugs}
+The details are in the codes, for \texttt{./omp-solved4} , please do \texttt{limit stacksize unlimited} in command line first to enlarge the stacksize.
+
+\section{Parallel Scan in OpenMP}
+I use \texttt{crunchy1} to run the codes, the model name is AMD Opteron(TM) Processor 6272, and have 64 CPUs. The results are shown in \cref{tab:scan}. We denote the number of threads to be $p$, and use \texttt{setenv OMP\_NUM\_THREADS} to control the number of threads we use. As $p$ increases, the time taken for parallel scan decreases and scale as the threads increases when $p\leq 8$.
+After $p\geq 64$, the time does not decrease because we only have 64 cores.
+
+\begin{table}[tbhp]
+	\label{tab:scan}
+	\caption{The time for parallel scan using OpenMP with different threads number $p$. The vector length is $N=10^8.$}
+		\centering
+	\begin{tabular}{c|c|c}
+		\hline 
+Threads number $p$	& Sequential-scan [s]  &  Parallel-scan [s]\\ 
+		\hline 
+	1	& 2.214138 & 1.409567 \\ 
+	2	& 2.559628& 1.313942 \\ 
+	4	& 2.235220&  0.815714\\ 
+	8 & 2.504774 & 0.442005\\
+	16 & 2.228650 & 0.504438 \\
+	32 & 2.295501 & 0.334572 \\
+	64 & 2.223448 & 0.303463 \\
+	128 & 2.208624 & 0.414760 \\
+		\hline 
+	\end{tabular} 
+\end{table}
+
+
 \end{document}
