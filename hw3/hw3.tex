@@ -150,4 +150,46 @@ Threads number $p$	& Sequential-scan [s]  &  Parallel-scan [s]\\
 \end{table}
 
 
+\section{OpenMP version of 2D Jacobi/Gauss-Seidel smoothing}
+The machine I use is the same as in last section. In \cref{tab:L2D-100}, I compare the time for different methods when using different number of threads. At first (number of threads $\leq 8$), the time decreases as the scaling of the increase of threads, after 8 threads, the time increases. The times for these two methods are similar when using same number of threads.
+\begin{table}[tbhp]
+	\label{tab:L2D-100}
+	\caption{The time comparison for Jacobi and Gauss-Seidel method using different number of threads. The mesh size $N=100$ and iteration number is 5000. The initial residual for both methods is 100, Jacobi ends with residual: 7.284635, Gauss-Seidel ends with residual: 0.917052.}
+	\centering
+	\begin{tabular}{c|c|c}
+		\hline 
+		Threads number & Jacobi [s]  &  Gauss-Seidel [s]\\ 
+		\hline 
+		1	& 1.666097 & 1.475124 \\ 
+		2	& 0.905389& 0.767714 \\ 
+		4	&  0.490199&  0.412829\\ 
+		8 & 0.294514 & 0.254353\\
+		16 & 0.234049 & 0.253860\\
+		32 & 0.348937 &  0.455067 \\
+		\hline 
+	\end{tabular} 
+\end{table}
+
+In \cref{tab:L2D-N}, I compare the time and convergence for different $N$'s. The time for both methods are similar, while the Gauss-Seidel converges faster than Jacobi, but this difference decreases as $N$ increases.At the first few iterations, Jacobi converges more quickly and stably than the Gauss-Seidel,  but in the end, the Gauss-Seidel will achieve much faster convergence. As $N$ increase, we also observe the convergence factor decreases rapidly for both methods.
+
+\begin{table}[tbhp]
+	\label{tab:L2D-N}
+	\caption{The comparison for Jacobi and Gauss-Seidel method using different $N=100$ and iteration number is 5000, the threads number is 8. We compare the times as well as the convergence speed of both methods. The convergence speed is characterized by the factor between the initial residual and the final residual, larger factor means faster convergence.}
+	\centering
+	\begin{tabular}{c|c c|r r}
+		\hline 
+		$N$ & Jacobi time [s]  &  Gauss-Seidel time [s] &  Jacobi factor &  Gauss-Seidel factor \\ 
+		\hline 
+		50 &  0.139663 & 0.108166 & 16045.910103 & 150285452.645879\\
+		100 & 0.294316 & 0.266196 &  13.727524 & 109.045039 \\
+		150 & 0.635592 & 0.494592 & 3.617021 &  7.547468\\
+		200 &  1.035472 &   0.815142 & 2.259144 &  2.944490 \\
+		\hline 
+	\end{tabular} 
+\end{table}
+
+
+
+
+
 \end{document}
