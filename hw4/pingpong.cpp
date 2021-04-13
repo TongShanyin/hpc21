@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <mpi.h>
+#include <string.h>
 #include <iostream>
 
 double time_pingpong(int proc0, int proc1, long Nrepeat, long Nsize, MPI_Comm comm) {
@@ -47,9 +48,16 @@ int main(int argc, char** argv) {
   int proc0 = atoi(argv[1]);
   int proc1 = atoi(argv[2]);
 
-  int rank;
+  int rank,p;
   MPI_Comm comm = MPI_COMM_WORLD;
   MPI_Comm_rank(comm, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &p);
+
+  /* get name of host running MPI process */
+  char processor_name[MPI_MAX_PROCESSOR_NAME];
+  int name_len;
+  MPI_Get_processor_name(processor_name, &name_len);
+  printf("Rank %d/%d running on %s.\n", rank, p, processor_name);
 
   long Nrepeat = 1000;
   double tt = time_pingpong(proc0, proc1, Nrepeat, 1, comm);
