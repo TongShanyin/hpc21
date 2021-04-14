@@ -1,0 +1,125 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[centertags]{amsmath}
+\usepackage{amsfonts,amssymb, amsthm}
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage[shortlabels]{enumitem}
+\usepackage{bm}
+
+\usepackage{cite,graphicx,color}
+%\usepackage{fourier}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{enumitem}
+\usepackage{bbm}
+
+\usepackage{tikz,pgfplots}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\usepackage{mathtools}
+%\mathtoolsset{showonlyrefs} % only show no. of refered eqs
+
+\usepackage{cleveref}
+
+\textheight 8.5in
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{assumption}{Assumption}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+
+\newtheoremstyle{dotlessP}{}{}{\color{blue!50!black}}{}{\color{blue}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{question}{Question}
+
+
+
+\def\VV{\mathbb{V}}
+\def\EE{\mathbb{E}}
+\def\PP{\mathbb{P}}
+\def\RR{\mathbb{R}}
+\newcommand{\mD}{\mathcal{D}}
+\newcommand{\mF}{F}%{\mathcal{F}}
+
+\DeclareMathOperator{\sgn}{sgn}
+%\DeclareMathOperator{\erf}{erf}
+\DeclareMathOperator{\erfc}{erfc}
+\DeclareRobustCommand{\argmin}{\operatorname*{argmin}}
+\DeclareRobustCommand{\arginf}{\operatorname*{arginf}}
+
+\def\EE{\mathbb{E}}\def\PP{\mathbb{P}}
+\def\NN{\mathbb{N}}\def\RR{\mathbb{R}}\def\ZZ{\mathbb{Z}}
+
+
+
+\def\<{\left\langle} \def\>{\right\rangle}
+
+
+
+
+
+
+
+\newcommand{\emphasis}[1]{\textcolor{red!80!black}{#1}}
+\newcommand{\shanyin}[1]{\textcolor{blue!80!black}{#1}}
+
+% ****************************
+\begin{document}
+
+
+\title{High performance computing HW3}
+\author{Shanyin Tong, st3255@nyu.edu}
+
+\maketitle
+
+\section{Greene network test}
+I tried running \texttt{pingpong} example between CPU cores on different nodes on Greene: \texttt{cs304.nyu.cluster} and \texttt{cs303.nyu.cluster}. The latency is 8.227587e-03 ms, and the bandwidth is 1.289275e+01 GB/s.
+
+\section{MPI ring communication}
+I used 4 cores and 2 nodes, i.e., 2 cores for each node on Greene:\texttt{cs043.nyu.cluster} and \texttt{cs042.nyu.cluster}. The latency is 2.438797e-03 ms, and the bandwidth is 8.051061e+00 GB/s.
+
+\section{MPI-parallel implementation of Jacobi 2D}
+I implemented the MPI-parallel implementation of Jacobi iteration for solving Poisson equation in 2D, the codes are in \texttt{Jacobi2D-mpi.cpp}, it is a hybrid of MPI and OpenMP. Here are the results for the first several iterations:
+\begin{lstlisting}
+Iter 0: Residual: 1023.12
+Iter 10: Residual: 1019.62
+Iter 20: Residual: 1017.62
+Iter 30: Residual: 1016.06
+Iter 40: Residual: 1014.74
+Iter 50: Residual: 1013.56
+Iter 60: Residual: 1012.5
+Iter 70: Residual: 1011.52
+Iter 80: Residual: 1010.6
+Iter 90: Residual: 1009.75
+Time elapsed is 20.465250 seconds.
+\end{lstlisting}
+
+\section{Plan for final project}
+\end{document}
